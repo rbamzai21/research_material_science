@@ -1,0 +1,11 @@
+System: A small peptide in water box
+
+Molecule description:
+- A tripeptide Gly-Ala-Ser
+- Solvated in a cubic box of TIP3P water (approx. 500 molecules)
+- Neutralized with Na+ counterions
+
+Simulation goal:
+- Study backbone dihedral transitions of the peptide
+- Monitor radius of gyration
+- Observe hydrogen bonding between peptide and solvent
