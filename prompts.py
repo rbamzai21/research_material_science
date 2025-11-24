@@ -40,10 +40,9 @@ Output format:
 
 def fix_prompt_with_error(log_tail, base):
     return f"""
-A LAMMPS simulation failed with the following error log:
-```
+A LAMMPS simulation failed with the following error log: 
 
-Regenerate a corrected version of the prompt **strictly in the same format** as the base.
+{log_tail}
 
 Regenerate a corrected version of the prompt **strictly in the same format** as the base. 
 

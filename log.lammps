@@ -1,8 +1,10 @@
-LAMMPS (12 Jun 2025)
-OMP_NUM_THREADS environment is not set. Defaulting to 1 thread. (src/comm.cpp:99)
+LAMMPS (22 Jul 2025 - Update 1)
+OMP_NUM_THREADS environment is not set. Defaulting to 1 thread.
   using 1 OpenMP thread(s) per MPI task
-Loaded 1 plugins from C:\Users\maany\AppData\Local\LAMMPS 64-bit 12Jun2025\plugins
+Restoring plugin: Hello world command v1.1 by Axel Kohlmeyer (akohlmey@gmail.com)
+Loaded 1 plugins from C:\Users\amrit\AppData\Local\LAMMPS 64-bit 22Jul2025\plugins
 fix mycv all colvars outputs/colvars.conf
-ERROR: Fix colvars command before simulation box is defined (src/modify.cpp:840)
+ERROR: Fix colvars command before simulation box is defined (src/modify.cpp:841)
 Last input line: fix mycv all colvars outputs/colvars.conf 
                               ^^^^^^^
+Total wall time: 0:00:00

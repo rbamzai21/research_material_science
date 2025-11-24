@@ -1,0 +1,83 @@
+```tcl
+# colvars.conf
+
+colvar {
+    name tolerance_factor
+    width 0.01
+    lowerBoundary 0.5
+    upperBoundary 1.5
+
+    atomGroup {
+        name A_cations
+        atoms 1 2 3 4 5
+    }
+
+    atomGroup {
+        name B_cations
+        atoms 6 7 8 9 10
+    }
+
+    atomGroup {
+        name X_anions
+        atoms 11 12 13 14 15 16 17 18 19 20
+    }
+
+    distance {
+        name A_X_distance
+        group1 { atomGroup A_cations }
+        group2 { atomGroup X_anions }
+    }
+
+    distance {
+        name B_X_distance
+        group1 { atomGroup B_cations }
+        group2 { atomGroup X_anions }
+    }
+
+    coordination {
+        name BX6_octahedra
+        centralAtomGroup { atomGroup B_cations }
+        ligandAtomGroup { atomGroup X_anions }
+        cutoff 3.0
+    }
+}
+
+colvar {
+    name octahedral_tilt
+    angle {
+        atom1 6
+        atom2 11
+        atom3 7
+    }
+    angle {
+        atom1 7
+        atom2 12
+        atom3 8
+    }
+    angle {
+        atom1 8
+        atom2 13
+        atom3 9
+    }
+}
+
+colvar {
+    name tolerance_ratio
+    customFunction {
+        name tolerance_ratio_func
+        expression "(r_A + r_X) / (sqrt(2)*(r_B + r_X))"
+        # r_A, r_B, r_X are placeholders for ionic radii; actual implementation requires mapping
+    }
+}
+```
+```lammps
+# in.lammps
+
+units real
+atom_style full
+read_data system.data
+
+fix mycv all colvars outputs/colvars.conf
+
+# Additional simulation settings (e.g., force field, timestep) should be added here as needed
+```

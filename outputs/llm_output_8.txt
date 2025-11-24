@@ -1,0 +1,42 @@
+Your `colvars.conf` and `in.lammps` files look mostly correct for defining collective variables and using them in LAMMPS with the colvars module. Here are a few notes and suggestions to ensure everything works smoothly:
+
+1. **Colvars Module in LAMMPS**:  
+   Make sure your LAMMPS build includes the colvars package. You can check by running `lmp -h` and looking for `colvars` in the list of packages.
+
+2. **File Paths**:  
+   In your LAMMPS input, you have:  
+   ```fix mycv all colvars outputs/colvars.conf```  
+   Ensure the path `outputs/colvars.conf` is correct relative to where you run LAMMPS. If the file is in the current directory, just use `colvars.conf`.
+
+3. **Atom Indices Consistency**:  
+   The atom groups in your colvars config reference atoms 1-20. Verify that your `system.data` file contains at least 20 atoms and that the atom IDs correspond to these indices.
+
+4. **Custom Function with Property**:  
+   Your `oxidation_state_variance` colvar uses a custom function with `property oxidation_state`. This requires that the colvars module in LAMMPS is aware of the `oxidation_state` property for atoms. Usually, this means your atom style or data file must include this property, or you have to define it in colvars. Make sure your LAMMPS build and data file support this.
+
+5. **Example Minimal Additions**:  
+   Here's a minimal example of how to add a timestep and run command in your `in.lammps` to complete the input script:
+
+   ```lammps
+   timestep 1.0
+   run 10000
+   ```
+
+---
+
+### Final example `in.lammps` snippet:
+
+```lammps
+units real
+atom_style full
+read_data system.data
+
+fix mycv all colvars colvars.conf
+
+timestep 1.0
+run 10000
+```
+
+---
+
+If you want, I can help you generate a complete minimal LAMMPS input script including thermostat, integrator, and output commands. Just let me know!

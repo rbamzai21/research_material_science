@@ -1,0 +1,62 @@
+```tcl
+# colvars.conf
+
+colvar {
+  name tolerance_factor
+  width 0.01
+  lowerBoundary 0.7
+  upperBoundary 1.2
+  distance {
+    atomGroup {
+      atoms 1 2 3 4 5 6 7 8 9
+    }
+    atomGroup {
+      atoms 10 11 12 13 14 15 16 17 18
+    }
+  }
+}
+
+colvar {
+  name octahedral_tilt
+  width 1.0
+  lowerBoundary 0.0
+  upperBoundary 30.0
+  angle {
+    atomGroup {
+      atoms 2 5 8
+    }
+    atomGroup {
+      atoms 1 4 7
+    }
+    atomGroup {
+      atoms 3 6 9
+    }
+  }
+}
+
+colvar {
+  name oxidation_state_balance
+  width 0.1
+  lowerBoundary -2.0
+  upperBoundary 2.0
+  custom {
+    name oxidation_diff
+    script {
+      # Custom script to calculate difference in oxidation states between A and B sites
+      # Placeholder: user should replace with actual calculation
+      return 0.0
+    }
+  }
+}
+```
+```lammps
+# in.lammps
+
+units real
+atom_style full
+read_data system.data
+
+fix mycv all colvars outputs/colvars.conf
+
+# Additional simulation settings can be added below
+```

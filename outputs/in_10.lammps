@@ -1,0 +1,9 @@
+units real
+   atom_style full
+   read_data system.data
+
+   # Load colvars fix with your configuration file
+   fix mycv all colvars colvars.conf
+
+   # Run for 1000 steps (example)
+   run 1000

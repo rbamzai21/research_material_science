@@ -1,0 +1,7 @@
+units real
+atom_style full
+read_data system.data
+
+fix mycv all colvars outputs/colvars.conf
+
+# Add force field, timestep, run commands, etc.

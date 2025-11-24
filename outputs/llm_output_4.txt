@@ -1,0 +1,163 @@
+Your `colvars.conf` defines collective variables (colvars) for a LAMMPS simulation using the Colvars module, and your `in.lammps` input file loads this configuration. Here are some notes and suggestions to ensure everything works smoothly:
+
+---
+
+### 1. **Colvars Configuration (`colvars.conf`)**
+
+- You define three colvars:
+  - `tolerance_factor`: combines distances and coordination numbers.
+  - `octahedral_tilt`: averages several angles.
+  - `tolerance_ratio`: a custom function based on ionic radii placeholders.
+
+- **Potential issues:**
+
+  - The `customFunction` colvar uses placeholders (`r_A`, `r_B`, `r_X`) which are not defined anywhere. The Colvars module does not inherently know ionic radii; you must define these as fixed parameters or compute them from atom properties.
+
+  - The `distance` and `coordination` colvars are defined inside the `tolerance_factor` colvar block. Typically, `distance` and `coordination` are separate colvars or subcolvars, but your syntax suggests nesting. The Colvars module expects each colvar block to be independent. You may want to define these as separate colvars or use `subcolvar` syntax if supported.
+
+- **Suggested structure:**
+
+```tcl
+# Define distances as separate colvars
+colvar {
+    name A_X_distance
+    distance {
+        group1 { atomGroup A_cations }
+        group2 { atomGroup X_anions }
+    }
+}
+
+colvar {
+    name B_X_distance
+    distance {
+        group1 { atomGroup B_cations }
+        group2 { atomGroup X_anions }
+    }
+}
+
+colvar {
+    name BX6_octahedra
+    coordination {
+        centralAtomGroup { atomGroup B_cations }
+        ligandAtomGroup { atomGroup X_anions }
+        cutoff 3.0
+    }
+}
+
+# Then define tolerance_factor as a function of these colvars if needed
+colvar {
+    name tolerance_factor
+    width 0.01
+    lowerBoundary 0.5
+    upperBoundary 1.5
+    # You can define this as a customFunction combining A_X_distance, B_X_distance, BX6_octahedra
+}
+
+# Octahedral tilt angles as defined
+colvar {
+    name octahedral_tilt
+    angle {
+        atom1 6
+        atom2 11
+        atom3 7
+    }
+    angle {
+        atom1 7
+        atom2 12
+        atom3 8
+    }
+    angle {
+        atom1 8
+        atom2 13
+        atom3 9
+    }
+}
+
+# For tolerance_ratio, since ionic radii are constants, define them as fixed variables:
+colvar {
+    name tolerance_ratio
+    customFunction {
+        name tolerance_ratio_func
+        expression "(r_A + r_X) / (sqrt(2)*(r_B + r_X))"
+        # Define r_A, r_B, r_X as fixed variables or parameters
+        # Example:
+        # variable r_A 1.6
+        # variable r_B 0.7
+        # variable r_X 1.4
+    }
+}
+```
+
+---
+
+### 2. **Defining Fixed Variables for Ionic Radii**
+
+The Colvars module supports fixed variables that can be used in expressions:
+
+```tcl
+variable r_A 1.6
+variable r_B 0.7
+variable r_X 1.4
+```
+
+Then modify your customFunction:
+
+```tcl
+customFunction {
+    name tolerance_ratio_func
+    expression "(${r_A} + ${r_X}) / (sqrt(2)*(${r_B} + ${r_X}))"
+}
+```
+
+Make sure these variables are defined in the same `colvars.conf` or passed appropriately.
+
+---
+
+### 3. **LAMMPS Input File (`in.lammps`)**
+
+Your LAMMPS input snippet is minimal but correct for loading the colvars module:
+
+```lammps
+units real
+atom_style full
+read_data system.data
+
+fix mycv all colvars outputs/colvars.conf
+
+# Add force field, timestep, run commands, etc.
+```
+
+- **Additional recommendations:**
+
+  - Add `timestep` command.
+
+  - Define force field parameters or pair styles.
+
+  - Add `run` command.
+
+Example:
+
+```lammps
+pair_style lj/cut 10.0
+pair_coeff * * 0.1 3.5
+
+timestep 1.0
+
+fix mycv all colvars outputs/colvars.conf
+
+run 10000
+```
+
+---
+
+### 4. **Summary**
+
+- Separate distance and coordination colvars from the `tolerance_factor` colvar block.
+
+- Define fixed variables for ionic radii to use in customFunction expressions.
+
+- Complete your LAMMPS input with force field, timestep, and run commands.
+
+---
+
+If you want, I can help you rewrite the full `colvars.conf` and `in.lammps` files with these improvements. Would you like me to do that?

@@ -1,0 +1,63 @@
+```tcl
+# colvars.conf
+
+colvar {
+  name tolerance_factor_classic
+  width 0.01
+  lowerBoundary 0.5
+  upperBoundary 1.2
+  distance {
+    atomGroup1 {
+      atomNumbers 1 2 3 4 5 6 7 8
+    }
+    atomGroup2 {
+      atomNumbers 9 10 11 12 13 14 15 16
+    }
+  }
+  # Classic Goldschmidt tolerance factor approximation as ratio of distances
+  # (This is a placeholder; actual calculation would require more complex expressions)
+}
+
+colvar {
+  name octahedral_factor
+  width 0.01
+  lowerBoundary 0.3
+  upperBoundary 0.7
+  distance {
+    atomGroup1 {
+      atomNumbers 9 10 11 12 13 14 15 16
+    }
+    atomGroup2 {
+      atomNumbers 17 18 19 20 21 22 23 24
+    }
+  }
+  # Octahedral factor related to BX6 octahedra size ratio
+}
+
+colvar {
+  name oxidation_state_diff
+  width 0.1
+  lowerBoundary -3.0
+  upperBoundary 3.0
+  distance {
+    atomGroup1 {
+      atomNumbers 1 2 3 4
+    }
+    atomGroup2 {
+      atomNumbers 5 6 7 8
+    }
+  }
+  # Difference in effective ionic radii weighted by oxidation states between A and B cations
+}
+```
+```lammps
+# in.lammps
+
+units real
+atom_style full
+read_data system.data
+
+fix mycv all colvars outputs/colvars.conf
+
+run 0
+```

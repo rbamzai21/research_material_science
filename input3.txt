@@ -1,11 +1,23 @@
-System: A small peptide in water box
+System: Predicting stability of inorganic perovskite materials (ABX₃ and A₂BB′X₆)
 
 Molecule description:
-- A tripeptide Gly-Ala-Ser
-- Solvated in a cubic box of TIP3P water (approx. 500 molecules)
-- Neutralized with Na+ counterions
+- Perovskite oxides and halides of the form ABX₃
+    - A, B are cations of varying radii and oxidation states
+    - X is an anion: O²⁻, F⁻, Cl⁻, Br⁻, or I⁻
+- Also extended to double perovskites A₂BB′X₆
+
+Structural stability determined by ionic radii, oxidation states, and geometric constraints involving BX₆ octahedra
 
 Simulation goal:
-- Study backbone dihedral transitions of the peptide
-- Monitor radius of gyration
-- Observe hydrogen bonding between peptide and solvent
+- Can we develop a single, accurate, physically interpretable 1-dimensional tolerance factor that reliably predicts whether a given ABX₃ or A₂BB′X₆ compound will form a stable perovskite structure?
+- Specifically:
+    - Improve upon the classical Goldschmidt tolerance factor (t), which is inaccurate for many halides
+    - Use SISSO (Sure Independence Screening and Sparsifying Operator) to derive an optimal formula
+    - Produce a descriptor that is:
+        - Accurate across oxides and halides
+        - Monotonic and capable of yielding a probability of perovskite formation
+        - Based only on composition (ionic radii and oxidation states)
+    - Apply the new tolerance factor (τ) to:
+        - Validate performance on 576 known compounds
+        - Generalize to 1034 additional single/double perovskites
+        - Predict over 23,000 previously unexplored double perovskites likely to be stable

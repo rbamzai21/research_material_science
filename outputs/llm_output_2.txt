@@ -1,0 +1,115 @@
+Your `colvars.conf` and `in.lammps` look mostly correct for defining and using collective variables in LAMMPS with the Colvars module. However, there are a few points and suggestions to ensure proper functionality:
+
+1. **Atom Groups Definition in Colvars**  
+   The `atomGroup` blocks are correctly defined, but the syntax inside `distance` and `angle` colvars should directly reference these groups by name, not by nesting `atomGroup` again. For example, instead of:
+   ```tcl
+   distance {
+     group1 { atomGroup b_atoms }
+     group2 { atomGroup x_atoms }
+   }
+   ```
+   it should be:
+   ```tcl
+   distance {
+     group1 b_atoms
+     group2 x_atoms
+   }
+   ```
+
+2. **Averaging Over Multiple Pairs in Distance**  
+   The `componentCoeff` line with `1.0` alone does not average over all pairs. To average over multiple pairs, you typically list all pairs or use a multi-distance colvar with weights. Since you want the average B–X bond length, you might need to define multiple distances or use a custom script. The Colvars module does not automatically average over all pairs between two groups.
+
+3. **Angle Definition for Octahedral Distortion**  
+   The angle colvar is defined between three groups, but `group1` and `group3` are both `x_atoms` (many atoms). The angle colvar expects single atoms or groups with one atom each for angle calculation. You may need to define specific triplets or use a different approach to quantify octahedral distortion.
+
+4. **Tolerance Factor Proxy**  
+   The distance between `a_atoms` and `x_atoms` is defined, but again, this will produce multiple distances if groups have multiple atoms. You may want to specify which pairs or average these distances.
+
+---
+
+### Revised `colvars.conf` Example
+
+Here is a simplified and corrected version assuming you want to track average distances by defining multiple distance colvars or using a custom approach:
+
+```tcl
+# colvars.conf
+
+# Define atom groups
+atomGroup {
+  name b_atoms
+  atoms 2 3 4 5 6 7 8 9 10
+}
+atomGroup {
+  name x_atoms
+  atoms 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28
+}
+atomGroup {
+  name a_atoms
+  atoms 1
+}
+
+# Example: Define multiple distances for B–X pairs (assuming one-to-one mapping)
+# You need to specify pairs explicitly or use a script to generate these blocks
+
+# Collective Variable 1: Average B–X bond length (example for first pair)
+colvar {
+  name bx_bond_length_1
+  distance {
+    group1 { atom 2 }
+    group2 { atom 11 }
+  }
+  outputAppliedForce on
+}
+
+# Repeat for other B–X pairs or write a script to generate these
+
+# Collective Variable 2: Octahedral distortion parameter (example for one angle)
+colvar {
+  name octahedral_angle_1
+  angle {
+    group1 { atom 11 }
+    group2 { atom 2 }
+    group3 { atom 12 }
+    angleType cosine
+  }
+  outputAppliedForce on
+}
+
+# Collective Variable 3: Tolerance factor proxy (distance A–X)
+colvar {
+  name a_x_distance_1
+  distance {
+    group1 { atom 1 }
+    group2 { atom 11 }
+  }
+  outputAppliedForce on
+}
+```
+
+---
+
+### Your `in.lammps` file
+
+Your LAMMPS input file is fine for loading the colvars module:
+
+```lammps
+units real
+atom_style full
+
+read_data system.data
+
+fix mycv all colvars outputs/colvars.conf
+
+# Additional simulation settings can be added below as needed
+```
+
+---
+
+### Summary
+
+- Reference atom groups by name directly in `distance` and `angle` blocks.
+- For averaging over multiple pairs, define multiple colvars or use scripting.
+- Angles require specific triplets of atoms, not groups with multiple atoms.
+- Consider scripting to generate colvars for all relevant pairs if many.
+
+If you want, I can help generate a script to create these colvars automatically based on your atom groups. Let me know!
