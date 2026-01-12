@@ -3,55 +3,39 @@ def base_prompt(desc):
 You are a molecular simulation expert.
 
 Given the following system description:
-
 \"\"\"{desc}\"\"\"
 
-Your tasks are:
-1. Suggest 3 meaningful collective variables (CVs) based on the molecular structure.
-2. Write a valid `colvars.conf` file for LAMMPS using the Colvars module. Always define `atomGroup` sections internally within this file — do not assume LAMMPS group definitions.
-3. Write a valid LAMMPS input file `in.lammps` that:
-   - Uses `units real`
-   - Reads a given `.data` file containing the molecular system
-   - Applies the Colvars fix using the following command:
+Your tasks is to suggest 1 meaningful collective variables (CVs) based on the molecular structure.
 
-     fix mycv all colvars outputs/colvars.conf
+You must output this result in the following JSON format and nothing else: 
 
-Important Rules:
-- In `colvars.conf`, use `atomGroup` blocks to define all atom groups with explicit atom IDs.
-- Never refer to LAMMPS groups (e.g., `group1`, `all_atoms`) inside `colvars.conf`.
-- Do not include any explanation or commentary outside the code blocks.
-
-Formatting Instructions:
-- Enclose the `colvars.conf` content in triple backticks marked with `tcl`: ```tcl
-- Enclose the `in.lammps` content in triple backticks marked with `lammps`: ```lammps
-- Output only the two files. Do not include any other text.
-
-Output format:
-```tcl
-# colvars.conf
-...
-```
-```lammps
-# in.lammps
-...
-```
+{{
+  "cv_name": "short descriptive name",
+  "physical_quantity": "what physical phenomenon this CV measures",
+  "high_level_definition": "conceptual or mathematical description, no implementation details",
+  "information_required": [
+    "types of data needed (e.g., positions, distances, angles, energies)"
+  ],
+  "why_it_matters": "why this CV is relevant for this system"
+}}
 """
 
-
-def fix_prompt_with_error(log_tail, base):
+def code_prompt(cv_json):
     return f"""
-A LAMMPS simulation failed with the following error log: 
+You are a scientific programmer. 
 
-{log_tail}
+Given the following conceptual collective variable definition:
+\"\"\"{cv_json}\"\"\"
 
-Regenerate a corrected version of the prompt **strictly in the same format** as the base. 
+Write a Python script that computes a reasonable numerical realization of this CV from molecular simulation data. 
 
-Mandatory rules:
-- Output must begin with the line: "You are a molecular simulation expert."
-- Include both ```tcl and ```lammps code blocks.
-- Do not include any explanation or commentary outside the code blocks.
-
-Here is the original prompt:
-
-\"\"\"{base}\"\"\"
+Constraints:
+- Input path: data/input_data
+- Output CSV path: outputs/csv/cv_values.csv
+- Output columns: sample_id, cv_value
+- Use standard specific Python libraries only
+- Make reasonable approximations if needed
+- Output ONLY executable python code
 """
+
+

@@ -12,7 +12,6 @@ Simulation goal:
 - Can we develop a single, accurate, physically interpretable 1-dimensional tolerance factor that reliably predicts whether a given ABX₃ or A₂BB′X₆ compound will form a stable perovskite structure?
 - Specifically:
     - Improve upon the classical Goldschmidt tolerance factor (t), which is inaccurate for many halides
-    - Use SISSO (Sure Independence Screening and Sparsifying Operator) to derive an optimal formula
     - Produce a descriptor that is:
         - Accurate across oxides and halides
         - Monotonic and capable of yielding a probability of perovskite formation
