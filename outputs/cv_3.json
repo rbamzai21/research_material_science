@@ -1,0 +1,10 @@
+{
+  "cv_name": "Modified Geometric Stability Factor (MGSF)",
+  "physical_quantity": "Measures geometric compatibility and charge-size coupling affecting perovskite stability",
+  "information_required": [
+    "ionic radii of A, B, B\u2032, and X",
+    "oxidation states of A, B, B\u2032, and X"
+  ],
+  "why_it_matters": "This CV integrates size mismatch and charge balance effects by combining ionic radii and oxidation states in a nonlinear way, capturing distortions and electrostatic constraints that influence the formation and stability of perovskite structures across oxides and halides.",
+  "definition": "MGSF = ( (rA + rX) / (sqrt((rB + rB\u2032)/2 + rX)) ) * exp(-|nA/rA - (nB + nB\u2032)/(2*rB)|)  for double perovskites; for single perovskites (ABX3), replace (rB + rB\u2032)/2 and (nB + nB\u2032)/2 with rB and nB respectively."
+}

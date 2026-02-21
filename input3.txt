@@ -1,22 +1,39 @@
 System: Predicting stability of inorganic perovskite materials (ABX₃ and A₂BB′X₆)
 
-Molecule description:
+You are designing candidate 1-dimensional, composition-based descriptors for predicting whether a material forms a stable perovskite structure. 
+
+Material class:
 - Perovskite oxides and halides of the form ABX₃
-    - A, B are cations of varying radii and oxidation states
-    - X is an anion: O²⁻, F⁻, Cl⁻, Br⁻, or I⁻
-- Also extended to double perovskites A₂BB′X₆
+- Double perovskites A₂BB′X₆
+- A, B, B′ are cations with known ionic radii and oxidation states
+- X is an anion: O²⁻, F⁻, Cl⁻, Br⁻, or I⁻
 
-Structural stability determined by ionic radii, oxidation states, and geometric constraints involving BX₆ octahedra
+Physical basis: 
+- Stability depends on geometric compatibility of BX₆ octahedra
+- Size mismatch, charge balance, and coordination constraints control distortions
+- Only composition-based quantities may be used:
+    - ionic radii (rA, rB, rB′, rX)
+    - oxidation states (nA, nB, nB′, nX)
 
-Simulation goal:
-- Can we develop a single, accurate, physically interpretable 1-dimensional tolerance factor that reliably predicts whether a given ABX₃ or A₂BB′X₆ compound will form a stable perovskite structure?
-- Specifically:
-    - Improve upon the classical Goldschmidt tolerance factor (t), which is inaccurate for many halides
-    - Produce a descriptor that is:
-        - Accurate across oxides and halides
-        - Monotonic and capable of yielding a probability of perovskite formation
-        - Based only on composition (ionic radii and oxidation states)
-    - Apply the new tolerance factor (τ) to:
-        - Validate performance on 576 known compounds
-        - Generalize to 1034 additional single/double perovskites
-        - Predict over 23,000 previously unexplored double perovskites likely to be stable
+Descriptor requirements:
+- Produce a single scalar value (1D)
+- Must be physically interpretable
+- Must be monotonic with respect to stability
+- Must be computable from composition alone
+- Must generalize across oxides and halides
+
+Exploration guidance:
+- Do not restrict descriptors to simple ratios of ionic radii
+- Explore a broad range of functional forms, including:
+    - sums and differences of radii
+    - ratios and products
+    - nonlinear functions (logarithms, powers, exponentials)
+    - coupling between size and oxidation state (e.g., nA·rA, rB/nB)
+    - asymmetry or mismatch measures (e.g., |rA − rB|, (rA − rB)²)
+- Goldschmidt-like ratios may appear, but alternative mathematical structures should also be considered
+
+Goal: Generate novel candidate tolerance-factor–like descriptors that
+- improve predictive power over classical Goldschmidt t
+- perform consistently across oxides and halides
+- can be tested by regression or classification on known stability data
+- are suitable for high-throughput screening of large composition spaces

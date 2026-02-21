@@ -1,0 +1,10 @@
+{
+  "cv_name": "Charge-Weighted Octahedral Mismatch Index",
+  "physical_quantity": "Combined geometric and electrostatic mismatch between A-site and B-site cations relative to the anion size",
+  "information_required": [
+    "ionic radii of A, B (and B\u2032 if double perovskite), and X",
+    "oxidation states of A, B (and B\u2032 if double perovskite), and X"
+  ],
+  "why_it_matters": "This CV captures how the size and charge differences between cations influence the distortion and stability of the BX\u2086 octahedra and overall perovskite framework, reflecting both geometric fit and charge balance in a single scalar that generalizes across oxides and halides.",
+  "definition": "For ABX\u2083: CV = (n_A * r_A + n_B * r_B) / (|n_A * r_A - n_B * r_B| + r_X); For A\u2082BB\u2032X\u2086: CV = (n_A * r_A + n_B * r_B + n_B\u2032 * r_B\u2032) / (|n_A * r_A - n_B * r_B| + |n_A * r_A - n_B\u2032 * r_B\u2032| + r_X)"
+}

@@ -1,4 +1,5 @@
 import os
+import re
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -12,11 +13,27 @@ if not api_key:
 client = OpenAI(api_key=api_key)
 
 
-def query_llm(prompt, model="gpt-4.1-mini"):
+def extract_python(text: str) -> str:
+    """Extract Python from text, handling markdown code blocks."""
+    match = re.search(r"```(?:python)?\s*([\s\S]*?)", text, re.IGNORECASE)
+    if match:
+        code = match.group(1)
+    else:
+        code = text
+    
+    code = code.strip()
+
+    lines = code.splitlines()
+    if lines and lines[0].strip().lower() == "python":
+        lines = lines[1:]
+    
+    return "\n".join(lines).strip()
+
+def query_llm(prompt, system_prompt="You are a scientific assistant for molecular simulation and materials science.", model="gpt-4.1-mini"):
     response = client.chat.completions.create(
         model=model,
         messages=[
-            {"role": "system", "content": "You are a scientific assistant for molecular simulation and materials science."},
+            {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}
         ],
         temperature=0.3,

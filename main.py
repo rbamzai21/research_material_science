@@ -17,7 +17,7 @@ try:
 except FileNotFoundError:
     raise SystemExit("input3.txt not found")
 
-total_attempts = 15
+total_attempts = 3
 prompt = base_prompt(mol_description)
 
 for i in range(1, total_attempts + 1):
@@ -40,7 +40,7 @@ for i in range(1, total_attempts + 1):
     required_keys = {
         "cv_name", 
         "physical_quantity", 
-        "high_level_definition",
+        "definition",
         "information_required",
         "why_it_matters"
     }
