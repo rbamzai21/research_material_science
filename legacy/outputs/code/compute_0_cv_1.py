@@ -1,8 +1,9 @@
 python
 import os
+import re
+
 import numpy as np
 import pandas as pd
-import re
 
 # CV definition:
 # CV = | (nA * rA) - 0.5 * (nB * rB + nB' * rB') | / rX
@@ -43,14 +44,9 @@ t = np.linspace(0, 100, num_samples)
 tau = np.random.uniform(1, 10, num_samples)
 
 # Prepare DataFrame with required columns
-df = pd.DataFrame({
-    "sample_id": np.arange(1, num_samples + 1),
-    "rA": rA,
-    "rB": rB,
-    "rX": rX,
-    "t": t,
-    "tau": tau
-})
+df = pd.DataFrame(
+    {"sample_id": np.arange(1, num_samples + 1), "rA": rA, "rB": rB, "rX": rX, "t": t, "tau": tau}
+)
 
 # Prepare output directory
 output_dir = os.path.join("outputs", "csv")
@@ -59,7 +55,7 @@ os.makedirs(output_dir, exist_ok=True)
 # Construct CSV filename from CV name
 cv_name = "Charge-Weighted Octahedral Size Mismatch Index"
 # Replace any non-alphanumeric characters with underscore
-filename_base = re.sub(r'[^0-9a-zA-Z]+', '_', cv_name).strip('_')
+filename_base = re.sub(r"[^0-9a-zA-Z]+", "_", cv_name).strip("_")
 csv_filename = f"{filename_base}.csv"
 csv_path = os.path.join(output_dir, csv_filename)
 

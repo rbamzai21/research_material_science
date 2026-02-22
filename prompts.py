@@ -1,50 +1,99 @@
-import json
+"""All LLM prompts used in the MCTS formula search agent."""
 
-def base_prompt(desc):
-    return f"""
-You are a molecular simulation expert.
+SYSTEM_PROMPT = "You are a materials science expert. You propose mathematical descriptors and implement them as Python functions."
 
-Given the following system description:
-\"\"\"{desc}\"\"\"
+DEBUG_SYSTEM_PROMPT = "You are a Python debugging expert."
 
-Your tasks is to suggest 1 meaningful collective variables (CVs) based on the molecular structure.
+PROBLEM_DESCRIPTION = """
+Design a 1-dimensional descriptor for predicting whether ABX3 materials form stable perovskite structures.
 
-You must output this result in the following JSON format and nothing else: 
+The attached figure shows:
+(A) The cubic ABX3 perovskite structure — the A cation sits inside a cage of corner-sharing BX6 octahedra. Stability depends on how well the A cation fits this cage, which is controlled by the relative sizes of A, B, and X ions.
+(B) A periodic table map of all elements that appear at the A, B, or X sites in the experimentally characterized ABX3 compounds.
 
-{{
-  "cv_name": "short descriptive name",
-  "physical_quantity": "what physical phenomenon this CV measures",
-  "information_required": [
-    "types of data needed (e.g., positions, distances, angles, energies)"
-  ],
-  "why_it_matters": "why this CV is relevant for this system",
-  "definition": "concrete formula"
-}}
-"""
+Available inputs (all floats):
+- rA: Shannon ionic radius of the A-site cation (12-fold coordination)
+- rB: Shannon ionic radius of the B-site cation (6-fold coordination)
+- rX: Shannon ionic radius of the X-site anion (6-fold coordination)
+- nA: oxidation state of A (positive integer)
+- nB: oxidation state of B (positive integer)
+- nX: oxidation state of X (negative integer)
 
-def code_prompt(cv_spec: dict) -> str:
-    """
-    Prompt that translates a conceptual CV into executable code.
-    """
-    return f"""
-You are a scientific programmer working with molecular simulation data.
-
-Given the following conceptual collective variable (CV):
-{json.dumps(cv_spec, indent=2)}
-
-Write a standalone Python script that computes a numerical realization of this CV.
+Physical context:
+- The classical Goldschmidt tolerance factor is t = (rA + rX) / (sqrt(2) * (rB + rX))
 
 Requirements:
-- DO NOT read any external input files.
-- Generate synthetic data internally if needed.
-- Write output to: outputs/csv directory
-- Ensure the directory outputs/csv exists (use os.makedirs).
-- Construct the CSV filename **from the CV name only**, replacing any spaces or special characters with underscores, so it is unique per CV
-- Output CSV columns must be exactly: sample_id, rA, rB, rX, t, tau.
-- Use only numpy, pandas, os.
-- Generate fully executable code.
-- Output ONLY valid Python code.
-"""
+- The function must be named `descriptor` with signature: def descriptor(rA, rB, rX, nA, nB, nX)
+- Return a single finite float value (1-dimensional descriptor)
+- The descriptor should be monotonic with respect to stability (either higher = more stable or lower = more stable)
 
+Output format — a JSON object with three keys:
+```json
+{
+  "function": "def descriptor(rA, rB, rX, nA, nB, nX):\\n    ...",
+  "explanation": "Brief explanation of the physical reasoning behind this descriptor.",
+  "formula": "LaTeX formula, e.g. t = \\\\frac{r_A + r_X}{\\\\sqrt{2}(r_B + r_X)}"
+}
+```
+Output ONLY the JSON, no other text.
+""".strip()
 
+INITIAL_PROMPT_TEMPLATE = """
+{problem_desc}
 
+Propose a novel descriptor formula. Be creative and try something genuinely new.
+Do NOT simply reproduce the Goldschmidt tolerance factor.
+
+Output ONLY the JSON, no other text.
+""".strip()
+
+IMPROVEMENT_PROMPT_TEMPLATE = """
+{problem_desc}
+
+The previous descriptor was:
+- Formula: {parent_formula}
+- Explanation: {parent_explanation}
+- Function:
+```python
+{parent_code}
+```
+
+Its performance on 576 experimentally characterized ABX3 compounds:
+{metrics_summary}
+
+The attached histogram shows the descriptor value distribution for perovskites (blue) vs nonperovskites (orange), with the decision boundary (dashed line). The green region is predicted perovskite, red is predicted nonperovskite.
+
+Analyze what the previous descriptor gets wrong:
+- Look at the overlap between perovskite and nonperovskite distributions
+- Consider which anion types (O, F, Cl, Br, I) have low accuracy
+- Think about what physical effects are missing
+
+Propose an IMPROVED descriptor that addresses these weaknesses. Make a meaningful change to the functional form, not just parameter tweaking.
+
+Output ONLY the JSON, no other text.
+""".strip()
+
+DEBUG_PROMPT_TEMPLATE = """
+The following Python descriptor function crashed when executed on the dataset:
+
+```python
+{code}
+```
+
+Error message:
+```
+{error}
+```
+
+Fix the function so it handles all valid inputs without errors.
+Constraints:
+- The function must be named `descriptor`
+- Signature: def descriptor(rA, rB, rX, nA, nB, nX)
+- rA, rB, rX are positive floats (ionic radii in Angstroms)
+- nA, nB are positive integers (oxidation states)
+- nX is a negative integer (oxidation state)
+- rA > rB is guaranteed
+- Must return a single finite float
+
+Output ONLY the fixed Python function, no explanation.
+""".strip()

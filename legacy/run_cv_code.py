@@ -1,18 +1,19 @@
 import os
-import sys
 import subprocess
+import sys
 import tempfile
+
 import pandas as pd
-from llm_utils import extract_python
 
 CODE_DIR = "outputs/code"
 CSV_DIR = "outputs/csv"
 
 os.makedirs(CSV_DIR, exist_ok=True)
 
+
 def run_script(script_path: str):
     # Read original script
-    with open(script_path, "r", encoding="utf-8") as f:
+    with open(script_path, encoding="utf-8") as f:
         lines = f.readlines()
 
     # Remove first line if it's literally 'python'
@@ -20,7 +21,7 @@ def run_script(script_path: str):
         lines = lines[1:]
 
     # Prepend UTF-8 encoding declaration
-    lines = ['# -*- coding: utf-8 -*-\n'] + lines
+    lines = ["# -*- coding: utf-8 -*-\n"] + lines
 
     # Write cleaned script to temp file
     with tempfile.NamedTemporaryFile("w", suffix=".py", delete=False, encoding="utf-8") as tmp:
@@ -31,8 +32,7 @@ def run_script(script_path: str):
         subprocess.run(
             [sys.executable, temp_script_path],
             check=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            capture_output=True,
             text=True,
         )
         return True, None
@@ -41,25 +41,27 @@ def run_script(script_path: str):
     finally:
         if os.path.exists(temp_script_path):
             os.remove(temp_script_path)
-        
+
+
 def validate_csv(csv_path: str):
     if not os.path.exists(csv_path):
         return False, "CSV file not found"
-    
+
     try:
         df = pd.read_csv(csv_path)
     except Exception as e:
         return False, f"failed to read csv: {e}"
-    
+
     required_cols = {"sample_id", "rA", "rB", "rX", "t", "tau"}
 
     if not required_cols.issubset(df.columns):
         return False, "missing required columns"
-    
+
     if len(df) == 0:
         return False, "empty csv"
-    
+
     return True, None
+
 
 def main():
     scripts = sorted(
@@ -74,14 +76,15 @@ def main():
         cv_name = script.replace("compute_", "").split("_", 1)[1].replace(".py", "")
 
         print(f"\nRunning CV script: {script}")
-        
-        success, error = run_script(script_path) 
+
+        success, error = run_script(script_path)
 
         if not success:
             print(f"Execution failed for {cv_name}: {error}")
             continue
 
         print(f"CV {cv_name} executed successfully")
+
 
 if __name__ == "__main__":
     main()

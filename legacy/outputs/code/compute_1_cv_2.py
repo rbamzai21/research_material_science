@@ -1,8 +1,9 @@
 python
 import os
+import re
+
 import numpy as np
 import pandas as pd
-import re
 
 # CV details
 cv_name = "Charge-Weighted Octahedral Mismatch Index"
@@ -12,7 +13,7 @@ output_dir = os.path.join("outputs", "csv")
 os.makedirs(output_dir, exist_ok=True)
 
 # Construct filename from CV name by replacing non-alphanumeric with underscores
-filename = re.sub(r'\W+', '_', cv_name) + ".csv"
+filename = re.sub(r"\W+", "_", cv_name) + ".csv"
 output_path = os.path.join(output_dir, filename)
 
 # Synthetic data generation parameters
@@ -57,14 +58,9 @@ t = (rA + rX) / (np.sqrt(2) * (rB + rX))
 # tau: a synthetic parameter related to charge mismatch, e.g. |nA - nB| / (|nX| + 1)
 tau = np.abs(nA - nB) / (np.abs(nX) + 1)
 
-df = pd.DataFrame({
-    "sample_id": np.arange(1, n_samples + 1),
-    "rA": rA,
-    "rB": rB,
-    "rX": rX,
-    "t": t,
-    "tau": tau
-})
+df = pd.DataFrame(
+    {"sample_id": np.arange(1, n_samples + 1), "rA": rA, "rB": rB, "rX": rX, "t": t, "tau": tau}
+)
 
 # Save to CSV
 df.to_csv(output_path, index=False)

@@ -1,7 +1,8 @@
 import os
 import re
-from openai import OpenAI
+
 from dotenv import load_dotenv
+from openai import OpenAI
 
 load_dotenv()
 
@@ -20,21 +21,26 @@ def extract_python(text: str) -> str:
         code = match.group(1)
     else:
         code = text
-    
+
     code = code.strip()
 
     lines = code.splitlines()
     if lines and lines[0].strip().lower() == "python":
         lines = lines[1:]
-    
+
     return "\n".join(lines).strip()
 
-def query_llm(prompt, system_prompt="You are a scientific assistant for molecular simulation and materials science.", model="gpt-4.1-mini"):
+
+def query_llm(
+    prompt,
+    system_prompt="You are a scientific assistant for molecular simulation and materials science.",
+    model="gpt-4.1-mini",
+):
     response = client.chat.completions.create(
         model=model,
         messages=[
             {"role": "system", "content": system_prompt},
-            {"role": "user", "content": prompt}
+            {"role": "user", "content": prompt},
         ],
         temperature=0.3,
     )

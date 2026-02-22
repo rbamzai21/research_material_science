@@ -3,11 +3,13 @@ repos:
     rev: v5.0.0
     hooks:
       - id: check-ast
+        exclude: ^legacy/
       - id: check-added-large-files
         args: ['--maxkb=250']
       - id: check-merge-conflict
       - id: check-yaml
       - id: debug-statements
+        exclude: ^legacy/
       - id: end-of-file-fixer
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
@@ -17,10 +19,22 @@ repos:
     hooks:
       - id: pyupgrade
         args: [--py311-plus]
+        exclude: ^legacy/
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.9.1
     hooks:
       - id: ruff
         args: [--fix]
+        exclude: ^legacy/
       - id: ruff-format
+        exclude: ^legacy/
+
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run pytest tests/ -x -q
+        language: system
+        pass_filenames: false
+        always_run: true

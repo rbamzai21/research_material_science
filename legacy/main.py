@@ -1,7 +1,9 @@
-import os
 import json
+import os
+
 from dotenv import load_dotenv
 from llm_utils import query_llm
+
 from prompts import base_prompt
 
 print("Loading environment...")
@@ -12,7 +14,7 @@ CV_DIR = os.path.join(OUTPUT_DIR, "cv_specs")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 try:
-    with open("input3.txt", "r", encoding="utf-8") as f:
+    with open("input3.txt", encoding="utf-8") as f:
         mol_description = f.read()
 except FileNotFoundError:
     raise SystemExit("input3.txt not found")
@@ -38,18 +40,18 @@ for i in range(1, total_attempts + 1):
 
     # validate
     required_keys = {
-        "cv_name", 
-        "physical_quantity", 
+        "cv_name",
+        "physical_quantity",
         "definition",
         "information_required",
-        "why_it_matters"
+        "why_it_matters",
     }
 
     if not required_keys.issubset(cv_spec):
         print(f"Attempt {i}: missing required cv fields, skipping")
         continue
 
-    # save CV artifact 
+    # save CV artifact
     cv_path = os.path.join(OUTPUT_DIR, f"cv_{i}.json")
     try:
         with open(cv_path, "w", encoding="utf-8") as f:

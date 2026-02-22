@@ -1,6 +1,8 @@
-import os
 import json
+import os
+
 from llm_utils import query_llm
+
 from prompts import code_prompt
 
 CV_DIR = "outputs/"
@@ -8,10 +10,9 @@ CODE_DIR = "outputs/code"
 
 os.makedirs(CODE_DIR, exist_ok=True)
 
+
 def main():
-    cv_files = sorted(
-        f for f in os.listdir(CV_DIR) if f.endswith(".json")
-    )
+    cv_files = sorted(f for f in os.listdir(CV_DIR) if f.endswith(".json"))
 
     if not cv_files:
         raise SystemExit("No CV specs found in outputs/")
@@ -19,7 +20,7 @@ def main():
     for i, cv_file in enumerate(cv_files):
         cv_path = os.path.join(CV_DIR, cv_file)
 
-        with open(cv_path, "r", encoding="utf-8") as f:
+        with open(cv_path, encoding="utf-8") as f:
             cv_spec = json.load(f)
 
         cv_name = os.path.splitext(cv_file)[0]
@@ -48,6 +49,7 @@ def main():
         except Exception as e:
             print(f"Failed to write code for {cv_name}: {e}")
 
+
 def strip_code_fences(code: str) -> str:
     code = code.strip()
     if code.startswith("```"):
@@ -55,6 +57,7 @@ def strip_code_fences(code: str) -> str:
     if code.endswith("```"):
         code = code.rsplit("```", 1)[0]
     return code.strip()
+
 
 if __name__ == "__main__":
     main()

@@ -1,6 +1,6 @@
 System: Predicting stability of inorganic perovskite materials (ABX₃ and A₂BB′X₆)
 
-You are designing candidate 1-dimensional, composition-based descriptors for predicting whether a material forms a stable perovskite structure. 
+You are designing candidate 1-dimensional, composition-based descriptors for predicting whether a material forms a stable perovskite structure.
 
 Material class:
 - Perovskite oxides and halides of the form ABX₃
@@ -8,7 +8,7 @@ Material class:
 - A, B, B′ are cations with known ionic radii and oxidation states
 - X is an anion: O²⁻, F⁻, Cl⁻, Br⁻, or I⁻
 
-Physical basis: 
+Physical basis:
 - Stability depends on geometric compatibility of BX₆ octahedra
 - Size mismatch, charge balance, and coordination constraints control distortions
 - Only composition-based quantities may be used:

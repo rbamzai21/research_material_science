@@ -1,16 +1,19 @@
 python
 import os
+import re
+
 import numpy as np
 import pandas as pd
-import re
 
 # CV metadata
 cv_name = "Modified Geometric Stability Factor (MGSF)"
 
+
 # Function to sanitize filename from CV name
 def sanitize_filename(name):
     # Replace any character not alphanumeric or underscore with underscore
-    return re.sub(r'[^A-Za-z0-9]+', '_', name).strip('_') + ".csv"
+    return re.sub(r"[^A-Za-z0-9]+", "_", name).strip("_") + ".csv"
+
 
 # Function to compute MGSF for single perovskite
 def compute_mgsf_single(rA, rB, rX, nA, nB):
@@ -19,12 +22,14 @@ def compute_mgsf_single(rA, rB, rX, nA, nB):
     exponent = -np.abs(nA / rA - nB / rB)
     return (numerator / denominator) * np.exp(exponent)
 
+
 # Function to compute MGSF for double perovskite
 def compute_mgsf_double(rA, rB, rBp, rX, nA, nB, nBp):
     numerator = rA + rX
     denominator = np.sqrt((rB + rBp) / 2 + rX)
     exponent = -np.abs(nA / rA - (nB + nBp) / (2 * rB))
     return (numerator / denominator) * np.exp(exponent)
+
 
 # Generate synthetic data
 # Let's create 50 samples: half single perovskites, half double perovskites
@@ -67,35 +72,41 @@ nX_double = np.random.choice([-2, -1], half)
 
 # Compute MGSF values
 mgsf_single = compute_mgsf_single(rA_single, rB_single, rX_single, nA_single, nB_single)
-mgsf_double = compute_mgsf_double(rA_double, rB_double, rBp_double, rX_double, nA_double, nB_double, nBp_double)
+mgsf_double = compute_mgsf_double(
+    rA_double, rB_double, rBp_double, rX_double, nA_double, nB_double, nBp_double
+)
 
 # Compute tolerance factor t = (rA + rX) / (sqrt(2)*(rB + rX)) for single perovskite (common definition)
 t_single = (rA_single + rX_single) / (np.sqrt(2) * (rB_single + rX_single))
 # For double perovskite, average B radii
-t_double = (rA_double + rX_double) / (np.sqrt(2) * ((rB_double + rBp_double)/2 + rX_double))
+t_double = (rA_double + rX_double) / (np.sqrt(2) * ((rB_double + rBp_double) / 2 + rX_double))
 
 # Compute tau = (rA + rX) / (rB + rX) for single perovskite (a simple size ratio)
 tau_single = (rA_single + rX_single) / (rB_single + rX_single)
-tau_double = (rA_double + rX_double) / ((rB_double + rBp_double)/2 + rX_double)
+tau_double = (rA_double + rX_double) / ((rB_double + rBp_double) / 2 + rX_double)
 
 # Prepare dataframes
-df_single = pd.DataFrame({
-    "sample_id": [f"S_{i+1}" for i in range(half)],
-    "rA": rA_single,
-    "rB": rB_single,
-    "rX": rX_single,
-    "t": t_single,
-    "tau": tau_single
-})
+df_single = pd.DataFrame(
+    {
+        "sample_id": [f"S_{i + 1}" for i in range(half)],
+        "rA": rA_single,
+        "rB": rB_single,
+        "rX": rX_single,
+        "t": t_single,
+        "tau": tau_single,
+    }
+)
 
-df_double = pd.DataFrame({
-    "sample_id": [f"D_{i+1}" for i in range(half)],
-    "rA": rA_double,
-    "rB": (rB_double + rBp_double)/2,
-    "rX": rX_double,
-    "t": t_double,
-    "tau": tau_double
-})
+df_double = pd.DataFrame(
+    {
+        "sample_id": [f"D_{i + 1}" for i in range(half)],
+        "rA": rA_double,
+        "rB": (rB_double + rBp_double) / 2,
+        "rX": rX_double,
+        "t": t_double,
+        "tau": tau_double,
+    }
+)
 
 # Combine data
 df = pd.concat([df_single, df_double], ignore_index=True)
