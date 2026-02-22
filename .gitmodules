@@ -1,0 +1,3 @@
+[submodule "perovskite-stability"]
+	path = perovskite-stability
+	url = https://github.com/CJBartel/perovskite-stability.git

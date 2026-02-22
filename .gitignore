@@ -1,2 +1,7 @@
 .env
-.env
+.venv/
+__pycache__/
+*.pyc
+*.png
+*.pkl
+*.p
