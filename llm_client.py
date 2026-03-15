@@ -68,16 +68,58 @@ class LLMClient:
         return self._parse_json(raw)
 
     def _parse_json(self, response: str) -> dict:
+    # Strip markdown code fences
         match = re.search(r"```(?:json)?\s*(.*?)```", response, re.DOTALL)
         raw = match.group(1).strip() if match else response.strip()
-        # try-catch approved: LLM output format is unpredictable, fallback to regex extraction
+
+        # If no fences, try to isolate the JSON object
+        if not match:
+            obj_match = re.search(r"\{.*\}", raw, re.DOTALL)
+            raw = obj_match.group(0) if obj_match else raw
+
+        def _sanitize(s: str) -> str:
+            """Fix bare backslashes and literal newlines/tabs inside JSON string values."""
+            result = []
+            in_string = False
+            i = 0
+            while i < len(s):
+                c = s[i]
+                if c == '"' and (i == 0 or s[i-1] != '\\'):
+                    num_backslashes = 0
+                    j = i - 1
+                    while j >= 0 and s[j] == '\\':
+                        num_backslashes += 1
+                        j -= 1
+                    if num_backslashes % 2 == 0:  # even = not escaped
+                        in_string = not in_string
+                    result.append(c)
+                    i += 1
+                elif in_string and c == '\n':
+                    result.append('\\n')
+                    i += 1
+                elif in_string and c == '\t':
+                    result.append('\\t')
+                    i += 1
+                elif in_string and c == '\\':
+                    # Check if this is a valid JSON escape sequence
+                    next_c = s[i+1] if i+1 < len(s) else ''
+                    if next_c in ('"', '\\', '/', 'b', 'f', 'n', 'r', 't', 'u'):
+                        result.append(c)
+                        result.append(next_c)
+                        i += 2
+                    else:
+                        # Bare backslash — escape it
+                        result.append('\\\\')
+                        i += 1
+                else:
+                    result.append(c)
+                    i += 1
+            return ''.join(result)
+
         try:
-            return json.loads(raw)
-        except json.JSONDecodeError:
-            match2 = re.search(r"\{.*\}", response, re.DOTALL)
-            if match2:
-                return json.loads(match2.group(0))
-            raise ValueError(f"Could not parse JSON from LLM response:\n{response[:300]}") from None
+            return json.loads(_sanitize(raw))
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Could not parse JSON from LLM response:\n{response[:300]}") from e
 
     def _call(self, messages: list[dict]) -> str:
         self.stats.total_calls += 1

@@ -14,9 +14,6 @@ from prompts import (
 
 log = logging.getLogger(__name__)
 
-STRUCTURE_FIG = Path(__file__).parent / "assets" / "perovskite_structure_fig1.png"
-
-
 @dataclass
 class Proposal:
     function: str
@@ -38,7 +35,7 @@ def propose_initial(client: LLMClient) -> Proposal:
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": prompt},
     ]
-    data = client.query_json(messages, images=[STRUCTURE_FIG])
+    data = client.query_json(messages)
     return _build_proposal(data)
 
 
@@ -61,7 +58,7 @@ def propose_improvement(
         {"role": "system", "content": SYSTEM_PROMPT},
         {"role": "user", "content": prompt},
     ]
-    images = [STRUCTURE_FIG]
+    images = [plot_image] if plot_image.exists() else []
     if plot_image.exists():
         images.append(plot_image)
     data = client.query_json(messages, images=images)

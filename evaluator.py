@@ -1,7 +1,7 @@
 """Evaluate candidate descriptor formulas on the ABX3 dataset."""
 
 import logging
-import signal
+import threading
 from dataclasses import dataclass, field
 from pathlib import Path
 
@@ -51,29 +51,32 @@ def _exec_descriptor(func_code: str, df: pd.DataFrame) -> np.ndarray:
     exec(func_code, namespace)  # noqa: S102
     descriptor_fn = namespace["descriptor"]
 
-    values = []
-    old_handler = signal.signal(signal.SIGALRM, _timeout_handler)
-    signal.alarm(TIMEOUT_SECONDS)
-    # try/finally approved: must restore signal handler even if descriptor crashes
-    try:
-        for _, row in df.iterrows():
-            val = descriptor_fn(
-                rA=row["rA"],
-                rB=row["rB"],
-                rX=row["rX"],
-                nA=row["nA"],
-                nB=row["nB"],
-                nX=row["nX"],
-            )
-            if val is None or (isinstance(val, float) and (np.isnan(val) or np.isinf(val))):
-                raise ValueError(f"descriptor returned {val} for {row['ABX3']}")
-            values.append(float(val))
-    finally:
-        signal.alarm(0)
-        signal.signal(signal.SIGALRM, old_handler)
+    result = {"values": None, "error": None}
 
-    return np.array(values)
+    def _run():
+        try:
+            values = []
+            for _, row in df.iterrows():
+                val = descriptor_fn(
+                    rA=row["rA"], rB=row["rB"], rX=row["rX"],
+                    nA=row["nA"], nB=row["nB"], nX=row["nX"],
+                )
+                if val is None or (isinstance(val, float) and (np.isnan(val) or np.isinf(val))):
+                    raise ValueError(f"descriptor returned {val} for {row['ABX3']}")
+                values.append(float(val))
+            result["values"] = np.array(values)
+        except Exception as e:
+            result["error"] = e
 
+    thread = threading.Thread(target=_run, daemon=True)
+    thread.start()
+    thread.join(TIMEOUT_SECONDS)
+
+    if thread.is_alive():
+        raise EvalTimeout(f"descriptor timed out after {TIMEOUT_SECONDS}s")
+    if result["error"] is not None:
+        raise result["error"]
+    return result["values"]
 
 def _classify(
     values: np.ndarray, labels: np.ndarray, train_mask: np.ndarray, max_depth: int

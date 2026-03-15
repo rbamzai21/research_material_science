@@ -246,6 +246,9 @@ def run_mcts(
                 selected.id,
                 selected.accuracy,
             )
+        else: 
+            state.budget_used += 1
+            selected.visit_count += 1
 
         state.save(state_save_path)
 
